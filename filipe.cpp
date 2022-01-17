@@ -142,7 +142,7 @@ void print_search(HashTable* table, char* key) {
         return;
     }
     else {
-        printf("Key:%s, Value:%s\n", key, val);
+        printf("Key:%s, Value:%d\n", key, val);
     }
 }
 
@@ -212,20 +212,20 @@ int main(int argc, char* argv[]){
     }
 
     HashTable* ht = create_table(CAPACITY);
-    int index = 0;
     char* str2 = (char*)malloc(sizeof(char) * k);
     int relative = 0;
 
     while (input_file.get(byte)) {
         alphabet.insert(byte);
-        str2[index % k] = byte;
-        if((index+1) % k == 0 && index != 0){
+        if (relative < k){
+            str2[relative++] = byte;
+            if (relative == k)
+                ht_insert(ht, str2);
+        } else{
+            std::memmove(str2, str2 + 1, k);
+            str2[k-1] = byte;
             ht_insert(ht, str2);
-            cout<<str2<<endl;
         }
-
-        index++;
-
     }
 
     // print all elements of the set s2
