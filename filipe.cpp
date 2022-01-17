@@ -215,13 +215,15 @@ int main(int argc, char* argv[]){
     int index = 0;
     char* str2 = (char*)malloc(sizeof(char) * k);
     int relative = 0;
+
     while (input_file.get(byte)) {
         alphabet.insert(byte);
-        relative = index % k;
-
-        str2[relative] = byte;
-        if(relative == 0)
+        str2[index % k] = byte;
+        if((index+1) % k == 0 && index != 0){
             ht_insert(ht, str2);
+            cout<<str2<<endl;
+        }
+
         index++;
 
     }
