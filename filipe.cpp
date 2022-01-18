@@ -22,6 +22,7 @@ typedef struct Ht_item Ht_item;
 struct Ht_item {
     char* key;
     int value;
+    int *array;
 };
 
 typedef struct HashTable HashTable;
@@ -33,13 +34,15 @@ struct HashTable {
     Ht_item** items;
     int size;
     int count;
+    int array_Size;
 };
 
-Ht_item* create_item(char* key, int value) {
+Ht_item* create_item(char* key, int value, int n) {
     // Creates a pointer to a new hash table item
     Ht_item* item = (Ht_item*) malloc (sizeof(Ht_item));
     item->key = (char*) malloc (strlen(key) + 1);
     //item->value = (char*) malloc (strlen(value) + 1);
+    item ->array = (int*) calloc(n, sizeof(int));
 
     strcpy(item->key, key);
     item->value= 1;
@@ -47,11 +50,12 @@ Ht_item* create_item(char* key, int value) {
     return item;
 }
 
-HashTable* create_table(int size) {
+HashTable* create_table(int size, int array_size) {
     // Creates a new HashTable
     HashTable* table = (HashTable*) malloc (sizeof(HashTable));
     table->size = size;
     table->count = 0;
+    table->array_Size = array_size;
     table->items = (Ht_item**) calloc (table->size, sizeof(Ht_item*));
     for (int i=0; i<table->size; i++)
         table->items[i] = NULL;
@@ -83,7 +87,8 @@ void handle_collision(HashTable* table, unsigned long index, Ht_item* item) {
 
 void ht_insert(HashTable* table, char* key) {
     // Create the item
-    Ht_item* item = create_item(key, 1);
+
+    Ht_item* item = create_item(key, 1,table->array_Size);
 
     // Compute the index
     unsigned long index = hash_function(key);
@@ -102,6 +107,7 @@ void ht_insert(HashTable* table, char* key) {
 
         // Insert directly
         table->items[index] = item;
+
         table->count++;
     }
 
@@ -190,7 +196,12 @@ void print_table(HashTable* table) {
                         break;
                 }
             }
-            printf("%s , %s ;: Value:%d\n",string,table->items[i]->key, table->items[i]->value);
+            printf("%s , %s ",string,table->items[i]->key);
+            for( int ind = 0; ind < table->array_Size; ++ind )
+                printf( " %d ", table->items[i]->array[ind] );
+            printf("\n");
+            //printf("%s , %s ;: Value:%d\n",string,table->items[i]->key, table->items[i]->value);
+
         }
     }
     printf("-------------------\n\n");
@@ -211,12 +222,16 @@ int main(int argc, char* argv[]){
         return EXIT_FAILURE;
     }
 
-    HashTable* ht = create_table(CAPACITY);
-    char* str2 = (char*)malloc(sizeof(char) * k);
-    int relative = 0;
-
     while (input_file.get(byte)) {
         alphabet.insert(byte);
+    }
+
+    HashTable* ht = create_table(CAPACITY,alphabet.size());
+    char* str2 = (char*)malloc(sizeof(char) * k);
+    int relative = 0;
+    input_file.clear();
+    input_file.seekg(0);
+    while (input_file.get(byte)) {
         if (relative < k){
             str2[relative++] = byte;
             if (relative == k)
