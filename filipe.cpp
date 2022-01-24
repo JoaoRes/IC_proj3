@@ -31,6 +31,7 @@ struct Ht_item {
 
 typedef struct HashTable HashTable;
 HashTable* ht;
+HashTable* ht2;
 // Define the Hash Table here
 struct HashTable {
     // Contains an array of pointers
@@ -98,10 +99,13 @@ void ht_insert(HashTable* table, char* key,char next_char) {
 
     Ht_item* item = create_item(key, 1,table->array_Size);
 
+
     // Compute the index
     unsigned long index = hash_function(key);
 
     Ht_item* current_item = table->items[index];
+
+
 
     if (current_item == NULL) {
         // Key does not exist.
@@ -164,7 +168,7 @@ void print_search(HashTable* table, char* key) {
         return;
     }
     else {
-        printf("Key:%s, Value:%d\n", key, val);
+        //printf("Key:%s, Value:%d\n", key, val);
     }
 }
 
@@ -262,11 +266,13 @@ int main(int argc, char* argv[]){
     string filename(argv[1]);
     int k = stoi(argv[2]);
     double alfa = stod(argv[3]);
+    string avaluation(argv[4]);
     char byte = 0;
     //HashTable* ht = create_table(CAPACITY,alphabet.size());
 
+    ifstream output_file(avaluation);
     ifstream input_file(filename);
-    if (!input_file.is_open()) {
+    if (!input_file.is_open() || !output_file.is_open()) {
         cerr << "Could not open the file - '"
              << filename << "'" << endl;
         return EXIT_FAILURE;
@@ -277,6 +283,7 @@ int main(int argc, char* argv[]){
     }
 
     ht = create_table(CAPACITY,alphabet.size());
+    ht2 = create_table(CAPACITY,alphabet.size());
 
     char* old_str = (char*)malloc(sizeof(char) * k);
     int relative = 0;
@@ -301,11 +308,40 @@ int main(int argc, char* argv[]){
         cout << *itr << " ";
 
     }
+
+
+    char* old_str1 = (char*)malloc(sizeof(char) * k);
+    int relative1 = 0;
+    output_file.clear();
+    output_file.seekg(0);
+    for (relative1= 0; relative1 <k ; relative1++) {
+        output_file.get(byte);
+        old_str1[relative1++] = tolower(byte);
+
+    }
+    while (output_file.get(byte)) {
+        ht_insert(ht2, old_str1,tolower(byte));
+        std::memmove(old_str1, old_str1 + 1, k);
+        old_str1[k-1] = tolower(byte);
+    }
+    ht_insert(ht2, old_str1,tolower(byte));
+    // print all elements of the set s2
+    set<char, greater<char>>::iterator itr2;
+    cout << "\nAlphabet : \n";
+
+    for (itr2 = alphabet.begin(); itr != alphabet.end(); itr++) {
+        cout << *itr << " ";
+
+    }
     cout << endl;
     cout << endl;
     input_file.close();
+    output_file.close();
     entropy(ht,alfa);
+    entropy(ht2,alfa);
     print_table(ht);
+    cout << "-----------------------------------HASH 1--------------------------------" << endl;
+    print_table(ht2);
 
     return EXIT_SUCCESS;
 }
