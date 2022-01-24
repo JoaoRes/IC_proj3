@@ -5,10 +5,12 @@
 #include <set>
 #include <string>
 #include <cstring>
+#include <math.h>
 
 #define CAPACITY 500000 // Size of the Hash Table
 using namespace std;
 set<char> alphabet;
+
 
 unsigned long hash_function(char* str) {
     unsigned long i = 0;
@@ -24,10 +26,11 @@ struct Ht_item {
     char* key;
     int cocurrences;
     int *array;
+    double entropy;
 };
 
 typedef struct HashTable HashTable;
-
+HashTable* ht;
 // Define the Hash Table here
 struct HashTable {
     // Contains an array of pointers
@@ -36,6 +39,8 @@ struct HashTable {
     int size;
     int count;
     int array_Size;
+    double entropy;
+    int occurrences;
 };
 
 Ht_item* create_item(char* key, int value, int n) {
@@ -47,6 +52,7 @@ Ht_item* create_item(char* key, int value, int n) {
 
     strcpy(item->key, key);
     item->cocurrences= 0;
+    item->entropy = 0;
 
     return item;
 }
@@ -56,6 +62,7 @@ HashTable* create_table(int size, int array_size) {
     HashTable* table = (HashTable*) malloc (sizeof(HashTable));
     table->size = size;
     table->count = 0;
+    table->occurrences=0;
     table->array_Size = array_size;
     table->items = (Ht_item**) calloc (table->size, sizeof(Ht_item*));
     for (int i=0; i<table->size; i++)
@@ -113,6 +120,7 @@ void ht_insert(HashTable* table, char* key,char next_char) {
         table->items[index]->array[alfa_index]++;
         table->items[index]->cocurrences++;
         table->count++;
+        table->occurrences++;
     }
 
     else {
@@ -122,6 +130,7 @@ void ht_insert(HashTable* table, char* key,char next_char) {
             //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
             table->items[index]->array[alfa_index]++;
             table->items[index]->cocurrences++;
+            table->occurrences++;
             return;
         }
 
@@ -224,19 +233,37 @@ void print_table(HashTable* table) {
                 else if (table->items[i]->array[ind] >= 5)
                     cout << " " << white << table->items[i]->array[ind] << reset << " ";
             }
-            cout << " occurrences: " <<table->items[i]->cocurrences<<endl;
+            cout << " occurrences: " <<table->items[i]->cocurrences;
+            cout << " entropy: " <<table->items[i]->entropy<<endl;
 
         }
     }
+    cout << "File Entropy "<< table->entropy<<endl;
     printf("-------------------\n\n");
+}
+void entropy(HashTable* table,double alfa){
+    double p;
+    for (int i=0; i<table->size; i++) {
+        if (table->items[i]) {
+            for (int j = 0; j < table->array_Size; j++) {
+                if (table->items[i]->array[j] >= 0) {
+                    p = (double) (table->items[i]->array[j] + alfa) / (table->items[i]->cocurrences+alfa*table->array_Size);
+                    cout << "p " << p << endl;
+                    table->items[i]->entropy += -p * log(p);
+                }
+            }
+            table->entropy+=(table->items[i]->entropy * table->items[i]->cocurrences/ table ->occurrences)  ;
+        }
+    }
 }
 
 
 int main(int argc, char* argv[]){
     string filename(argv[1]);
     int k = stoi(argv[2]);
+    double alfa = stod(argv[3]);
     char byte = 0;
-
+    //HashTable* ht = create_table(CAPACITY,alphabet.size());
 
     ifstream input_file(filename);
     if (!input_file.is_open()) {
@@ -249,7 +276,8 @@ int main(int argc, char* argv[]){
         alphabet.insert(tolower(byte));
     }
 
-    HashTable* ht = create_table(CAPACITY,alphabet.size());
+    ht = create_table(CAPACITY,alphabet.size());
+
     char* old_str = (char*)malloc(sizeof(char) * k);
     int relative = 0;
     input_file.clear();
@@ -276,6 +304,7 @@ int main(int argc, char* argv[]){
     cout << endl;
     cout << endl;
     input_file.close();
+    entropy(ht,alfa);
     print_table(ht);
 
     return EXIT_SUCCESS;
