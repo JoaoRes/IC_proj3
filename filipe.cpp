@@ -8,6 +8,7 @@
 
 #define CAPACITY 500000 // Size of the Hash Table
 using namespace std;
+set<char> alphabet;
 
 unsigned long hash_function(char* str) {
     unsigned long i = 0;
@@ -85,7 +86,7 @@ void free_table(HashTable* table) {
 void handle_collision(HashTable* table, unsigned long index, Ht_item* item) {
 }
 
-void ht_insert(HashTable* table, char* key) {
+void ht_insert(HashTable* table, char* key,char next_char) {
     // Create the item
 
     Ht_item* item = create_item(key, 1,table->array_Size);
@@ -107,6 +108,9 @@ void ht_insert(HashTable* table, char* key) {
 
         // Insert directly
         table->items[index] = item;
+        int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+        //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+        table->items[index]->array[alfa_index]++;
 
         table->count++;
     }
@@ -114,7 +118,9 @@ void ht_insert(HashTable* table, char* key) {
     else {
         // Scenario 1: We only need to update value
         if (strcmp(current_item->key, key) == 0) {
-            table->items[index]->value++;
+            int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+            //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+            table->items[index]->array[alfa_index]++;
             return;
         }
 
@@ -154,6 +160,14 @@ void print_search(HashTable* table, char* key) {
 
 void print_table(HashTable* table) {
     printf("\nHash Table\n-------------------\n");
+    string reset = "\033[0m";
+    string red = "\033[1;31m";
+    string green = "\033[1;32m";
+    string blue = "\033[1;34m";
+    string yellow = "\033[1;33m";
+    string black = "\033[1;30m";
+    string white = "\033[1;37m";
+
     for (int i=0; i<table->size; i++) {
         if (table->items[i]) {
             printf("Index:%d, ", i);
@@ -191,14 +205,25 @@ void print_table(HashTable* table) {
                         if (isprint(c)){
                             //putchar(c);
                             string[s_i++]=c;
-
                         }
                         break;
                 }
             }
-            printf("%s , %s ",string,table->items[i]->key);
+            printf("%s  ",table->items[i]->key);
             for( int ind = 0; ind < table->array_Size; ++ind )
-                printf( " %d ", table->items[i]->array[ind] );
+                if (table->items[i]->array[ind] == 0)
+                    cout << " " << black<< table->items[i]->array[ind] <<reset <<" ";
+                else if (table->items[i]->array[ind] == 1)
+                    cout << " " << red<< table->items[i]->array[ind] <<reset <<" ";
+                else if (table->items[i]->array[ind] == 2)
+                    cout << " " << yellow<< table->items[i]->array[ind] <<reset <<" ";
+                else if (table->items[i]->array[ind] == 3)
+                    cout << " " << blue<< table->items[i]->array[ind] <<reset <<" ";
+                else if (table->items[i]->array[ind] == 4)
+                    cout << " " << green<< table->items[i]->array[ind] <<reset <<" ";
+                else if (table->items[i]->array[ind] >= 5)
+                    cout << " " << white<< table->items[i]->array[ind] <<reset <<" ";
+                //printf( " %d ", table->items[i]->array[ind] );
             printf("\n");
             //printf("%s , %s ;: Value:%d\n",string,table->items[i]->key, table->items[i]->value);
 
@@ -211,9 +236,8 @@ void print_table(HashTable* table) {
 int main(int argc, char* argv[]){
     string filename(argv[1]);
     int k = stoi(argv[2]);
-    vector<char> bytes;
     char byte = 0;
-    set<char> alphabet;
+
 
     ifstream input_file(filename);
     if (!input_file.is_open()) {
@@ -223,26 +247,25 @@ int main(int argc, char* argv[]){
     }
 
     while (input_file.get(byte)) {
-        alphabet.insert(byte);
+        alphabet.insert(tolower(byte));
     }
 
     HashTable* ht = create_table(CAPACITY,alphabet.size());
-    char* str2 = (char*)malloc(sizeof(char) * k);
+    char* old_str = (char*)malloc(sizeof(char) * k);
     int relative = 0;
     input_file.clear();
     input_file.seekg(0);
-    while (input_file.get(byte)) {
-        if (relative < k){
-            str2[relative++] = byte;
-            if (relative == k)
-                ht_insert(ht, str2);
-        } else{
-            std::memmove(str2, str2 + 1, k);
-            str2[k-1] = byte;
-            ht_insert(ht, str2);
-        }
-    }
+    for (relative= 0; relative <k ; relative++) {
+        input_file.get(byte);
+        old_str[relative++] = tolower(byte);
 
+    }
+    while (input_file.get(byte)) {
+        ht_insert(ht, old_str,tolower(byte));
+        std::memmove(old_str, old_str + 1, k);
+        old_str[k-1] = tolower(byte);
+    }
+    ht_insert(ht, old_str,tolower(byte));
     // print all elements of the set s2
     set<char, greater<char>>::iterator itr;
     cout << "\nAlphabet : \n";
