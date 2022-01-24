@@ -22,7 +22,7 @@ typedef struct Ht_item Ht_item;
 // Define the Hash Table Item here
 struct Ht_item {
     char* key;
-    int value;
+    int cocurrences;
     int *array;
 };
 
@@ -46,7 +46,7 @@ Ht_item* create_item(char* key, int value, int n) {
     item ->array = (int*) calloc(n, sizeof(int));
 
     strcpy(item->key, key);
-    item->value= 1;
+    item->cocurrences= 0;
 
     return item;
 }
@@ -111,7 +111,7 @@ void ht_insert(HashTable* table, char* key,char next_char) {
         int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
         //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
         table->items[index]->array[alfa_index]++;
-
+        table->items[index]->cocurrences++;
         table->count++;
     }
 
@@ -121,6 +121,7 @@ void ht_insert(HashTable* table, char* key,char next_char) {
             int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
             //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
             table->items[index]->array[alfa_index]++;
+            table->items[index]->cocurrences++;
             return;
         }
 
@@ -142,7 +143,7 @@ void ht_insert(HashTable* table, char* key,char next_char) {
     // Ensure that we move to a non NULL item
     if (item != NULL) {
         if (strcmp(item->key, key) == 0)
-            return item->value;
+            return item->cocurrences;
     }
     return -1;
 }
@@ -171,61 +172,59 @@ void print_table(HashTable* table) {
     for (int i=0; i<table->size; i++) {
         if (table->items[i]) {
             printf("Index:%d, ", i);
-            char* string = (char*) malloc (strlen(table->items[i]->key)*2 + 1);
+            char *string = (char *) malloc(strlen(table->items[i]->key) * 2 + 1);
             int s_i = 0;
-            for (const char* p = table->items[i]->key; *p != '\0'; ++p) {
+            for (const char *p = table->items[i]->key; *p != '\0'; ++p) {
                 int c = (unsigned char) *p;
-                switch (c)
-                {
+                switch (c) {
                     case '\\':
-                        string[s_i++]='\\';
-                        string[s_i++]='\\';
+                        string[s_i++] = '\\';
+                        string[s_i++] = '\\';
                         //printf("\\\\");
                         break;
                     case '\n':
                         //printf("\\n");
-                        string[s_i++]='\\';
-                        string[s_i++]='n';
+                        string[s_i++] = '\\';
+                        string[s_i++] = 'n';
                         break;
                     case '\r':
                         //printf("\\r");
-                        string[s_i++]='\\';
-                        string[s_i++]='r';
+                        string[s_i++] = '\\';
+                        string[s_i++] = 'r';
                         break;
                     case '\t':
                         //printf("\\t");
-                        string[s_i++]='\\';
-                        string[s_i++]='t';
+                        string[s_i++] = '\\';
+                        string[s_i++] = 't';
                         break;
 
                         // TODO: Add other C character escapes here.  See:
                         // <https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences>
 
                     default:
-                        if (isprint(c)){
+                        if (isprint(c)) {
                             //putchar(c);
-                            string[s_i++]=c;
+                            string[s_i++] = c;
                         }
                         break;
                 }
             }
-            printf("%s  ",table->items[i]->key);
-            for( int ind = 0; ind < table->array_Size; ++ind )
+            printf("%s  ", table->items[i]->key);
+            for (int ind = 0; ind < table->array_Size; ind++) {
                 if (table->items[i]->array[ind] == 0)
-                    cout << " " << black<< table->items[i]->array[ind] <<reset <<" ";
+                    cout << " " << black << table->items[i]->array[ind] << reset << " ";
                 else if (table->items[i]->array[ind] == 1)
-                    cout << " " << red<< table->items[i]->array[ind] <<reset <<" ";
+                    cout << " " << red << table->items[i]->array[ind] << reset << " ";
                 else if (table->items[i]->array[ind] == 2)
-                    cout << " " << yellow<< table->items[i]->array[ind] <<reset <<" ";
+                    cout << " " << yellow << table->items[i]->array[ind] << reset << " ";
                 else if (table->items[i]->array[ind] == 3)
-                    cout << " " << blue<< table->items[i]->array[ind] <<reset <<" ";
+                    cout << " " << blue << table->items[i]->array[ind] << reset << " ";
                 else if (table->items[i]->array[ind] == 4)
-                    cout << " " << green<< table->items[i]->array[ind] <<reset <<" ";
+                    cout << " " << green << table->items[i]->array[ind] << reset << " ";
                 else if (table->items[i]->array[ind] >= 5)
-                    cout << " " << white<< table->items[i]->array[ind] <<reset <<" ";
-                //printf( " %d ", table->items[i]->array[ind] );
-            printf("\n");
-            //printf("%s , %s ;: Value:%d\n",string,table->items[i]->key, table->items[i]->value);
+                    cout << " " << white << table->items[i]->array[ind] << reset << " ";
+            }
+            cout << " occurrences: " <<table->items[i]->cocurrences<<endl;
 
         }
     }
