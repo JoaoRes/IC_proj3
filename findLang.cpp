@@ -55,8 +55,8 @@ int main(int argc, char* argv[]){
 
         char* old_str1 = (char*)malloc(sizeof(char) * k);
         int relative1 = 0;
-    //    output_file.clear();
-    //    output_file.seekg(0);
+        input_file2.clear();
+        input_file2.seekg(0);
         for (relative1= 0; relative1 <k ; relative1++) {
             input_file2.get(byte);
             old_str1[relative1++] = tolower(byte);
@@ -92,18 +92,12 @@ int main(int argc, char* argv[]){
             language=i;
         }
 
-        alphabet.clear();
-
-        set<char, greater<char>>::iterator itr2;
-        cout << "\nAlphabet after clear: \n";
-
-        for (itr2 = alphabet.begin(); itr2 != alphabet.end(); itr2++) {
-            cout << *itr2 << " ";
+        if(i==9){
+            print_table(ht);
+            print_table(ht2);
         }
 
-        // print_table(ht);
-        // print_table(ht2);
-
+        alphabet.clear();
         free_table(ht);
         free_table(ht2);
     }
