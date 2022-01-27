@@ -91,6 +91,36 @@ void free_table(HashTable* table) {
     free(table);
 }
 
+void deep_copy_hashtable(HashTable* src, HashTable* dst){
+    for (int i=0; i<src->size; i++) {
+        if (src->items[i]) {
+            Ht_item* dst_item = create_item(src->items[i]->key, 1,src->array_Size);
+            dst->items[i] = dst_item;
+            // Compute the index
+            unsigned long index = hash_function(src->items[i]->key);
+            Ht_item* src_item = src->items[index];
+
+            for (int j = 0; j < src->array_Size; j++) {
+                dst->items[i]->array[j] = src->items[i]->array[j];
+            }
+
+            dst->items[i]->cocurrences=src->items[i]->cocurrences;
+            dst->items[i]->entropy=src->items[i]->entropy;
+        }
+    }
+}
+void clean_items(HashTable* table){
+    for (int i=0; i<table->size; i++) {
+        if (table->items[i]) {
+            for (int j = 0; j < table->array_Size; j++) {
+                table->items[i]->array[j] = 0;
+            }
+            table->items[i]->cocurrences=0;
+            table->items[i]->entropy=0;
+        }
+    }
+}
+
 void handle_collision(HashTable* table, unsigned long index, Ht_item* item) {
 }
 
@@ -150,6 +180,40 @@ void ht_insert(HashTable* table, char* key,char next_char) {
         }
     }
 }
+
+void ht_insert_second(HashTable* table, char* key,char next_char) {
+    // Create the item
+
+    Ht_item* item = create_item(key, 1,table->array_Size);
+
+
+    // Compute the index
+    unsigned long index = hash_function(key);
+
+    Ht_item* current_item = table->items[index];
+
+
+    if (current_item != NULL) {
+
+        // Scenario 1: We only need to update value
+        if (strcmp(current_item->key, key) == 0) {
+            if(next_char!= NULL) {
+                int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+                //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+                table->items[index]->array[alfa_index]++;
+            }
+            table->items[index]->cocurrences++;
+            table->occurrences++;
+            return;
+        }else {
+            // Scenario 2: Collision
+            // We will handle case this a bit later
+            handle_collision(table, index, item);
+            return;
+        }
+    }
+}
+
 
  int ht_search(HashTable* table, char* key) {
     // Searches the key in the hashtable
@@ -256,7 +320,7 @@ void entropy(HashTable* table,double alfa){
             for (int j = 0; j < table->array_Size; j++) {
                 if (table->items[i]->array[j] >= 0) {
                     p = (double) (table->items[i]->array[j] + alfa) / (table->items[i]->cocurrences+alfa*table->array_Size);
-                    cout << "p " << p << endl;
+                    //cout << "p " << p << endl;
                     table->items[i]->entropy += -p * log(p);
                 }
             }
@@ -275,9 +339,10 @@ int main(int argc, char* argv[]){
     char byte = 0;
     //HashTable* ht = create_table(CAPACITY,alphabet.size());
 
-    ifstream output_file(avaluation);
+
     ifstream input_file(filename);
-    if (!input_file.is_open() || !output_file.is_open()) {
+    ifstream input_file2(avaluation);
+    if (!input_file.is_open() || !input_file2.is_open()) {
         cerr << "Could not open the file - '"
              << filename << "'" << endl;
         return EXIT_FAILURE;
@@ -289,7 +354,6 @@ int main(int argc, char* argv[]){
 
     ht = create_table(CAPACITY,alphabet.size());
     ht2 = create_table(CAPACITY,alphabet.size());
-
     char* old_str = (char*)malloc(sizeof(char) * k);
     int relative = 0;
     input_file.clear();
@@ -314,36 +378,34 @@ int main(int argc, char* argv[]){
 
     }
 
+    //ht2 = create_table(CAPACITY,alphabet.size());
+    deep_copy_hashtable(ht, ht2);
+    clean_items(ht2);
 
     char* old_str1 = (char*)malloc(sizeof(char) * k);
     int relative1 = 0;
-    output_file.clear();
-    output_file.seekg(0);
+//    output_file.clear();
+//    output_file.seekg(0);
     for (relative1= 0; relative1 <k ; relative1++) {
-        output_file.get(byte);
+        input_file2.get(byte);
         old_str1[relative1++] = tolower(byte);
 
     }
-    while (output_file.get(byte)) {
-        ht_insert(ht2, old_str1,NULL);//Ntolower(byte));
+    while (input_file2.get(byte)) {
+        ht_insert_second(ht2, old_str1,tolower(byte));//Ntolower(byte));
         std::memmove(old_str1, old_str1 + 1, k);
         old_str1[k-1] = tolower(byte);
     }
-    ht_insert(ht2, old_str1,tolower(byte));
+    ht_insert_second(ht2, old_str1,tolower(byte));
     // print all elements of the set s2
-    set<char, greater<char>>::iterator itr2;
-    cout << "\nAlphabet : \n";
 
-    for (itr2 = alphabet.begin(); itr != alphabet.end(); itr++) {
-        cout << *itr << " ";
-
-    }
     cout << endl;
     cout << endl;
     input_file.close();
-    output_file.close();
+    input_file2.close();
     entropy(ht,alfa);
     entropy(ht2,alfa);
+
     print_table(ht);
     cout << "-----------------------------------HASH 1--------------------------------" << endl;
     print_table(ht2);
