@@ -119,9 +119,11 @@ void ht_insert(HashTable* table, char* key,char next_char) {
 
         // Insert directly
         table->items[index] = item;
-        int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
-        //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
-        table->items[index]->array[alfa_index]++;
+        if(next_char =! NULL) {
+            int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+            //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+            table->items[index]->array[alfa_index]++;
+        }
         table->items[index]->cocurrences++;
         table->count++;
         table->occurrences++;
@@ -130,9 +132,11 @@ void ht_insert(HashTable* table, char* key,char next_char) {
     else {
         // Scenario 1: We only need to update value
         if (strcmp(current_item->key, key) == 0) {
-            int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
-            //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
-            table->items[index]->array[alfa_index]++;
+            if(next_char!= NULL) {
+                int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+                //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+                table->items[index]->array[alfa_index]++;
+            }
             table->items[index]->cocurrences++;
             table->occurrences++;
             return;
@@ -262,6 +266,7 @@ void entropy(HashTable* table,double alfa){
 }
 
 
+
 int main(int argc, char* argv[]){
     string filename(argv[1]);
     int k = stoi(argv[2]);
@@ -320,7 +325,7 @@ int main(int argc, char* argv[]){
 
     }
     while (output_file.get(byte)) {
-        ht_insert(ht2, old_str1,tolower(byte));
+        ht_insert(ht2, old_str1,NULL);//Ntolower(byte));
         std::memmove(old_str1, old_str1 + 1, k);
         old_str1[k-1] = tolower(byte);
     }
