@@ -149,11 +149,10 @@ void ht_insert(HashTable* table, char* key,char next_char) {
 
         // Insert directly
         table->items[index] = item;
-        if(next_char =! NULL) {
-            int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
-            //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
-            table->items[index]->array[alfa_index]++;
-        }
+
+        int alfa_index = std::distance(alphabet.begin(), alphabet.find(next_char));
+        //cout << "alfa_index = "<< alfa_index << " char ="<<next_char<<endl;
+        table->items[index]->array[alfa_index]++;
         table->items[index]->cocurrences++;
         table->count++;
         table->occurrences++;
