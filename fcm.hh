@@ -241,7 +241,6 @@ void print_search(HashTable* table, char* key) {
 
 void print_entropy(HashTable* table){
     cout << "File Entropy "<< table->entropy<<endl;
-    printf("-------------------\n\n");
 }
 
 void print_table(HashTable* table) {
