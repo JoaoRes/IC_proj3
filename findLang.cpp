@@ -10,9 +10,10 @@ int main(int argc, char* argv[]){
     double alfa = stod(argv[2]);
     string avaluation(argv[3]);
     char byte = 0;
-    string filename[] = {"textos/czech.txt","textos/dutch.txt","textos/eng.txt","textos/esp.txt","textos/fin.txt","textos/fr.txt","textos/ger.txt","textos/ita.txt","textos/pol.txt","textos/pt.txt","textos/slovak.txt","textos/swe.txt"};
-    
-    for(int i=0; i<12 ;i++){
+    string filename[] = {"textos/czech.txt","textos/dutch.txt","textos/eng.txt","textos/esp.txt","textos/fin.txt","textos/fr.txt","textos/ita.txt","textos/pol.txt","textos/pt.txt","textos/slovak.txt","textos/swe.txt"};
+    double entropias[11];
+    double entr[11];
+    for(int i=0; i<11 ;i++){
         // open files
         ifstream input_file(filename[i]);
         ifstream input_file2(avaluation);
@@ -47,6 +48,8 @@ int main(int argc, char* argv[]){
             old_str[k-1] = tolower(byte);
         }
         ht_insert(ht, old_str,tolower(byte));
+
+        input_file.close();
         
         // print all elements of the set s2
         set<char, greater<char>>::iterator itr;
@@ -55,10 +58,6 @@ int main(int argc, char* argv[]){
         for (itr = alphabet.begin(); itr != alphabet.end(); itr++) {
             cout << *itr << " ";
         }
-
-        // if(i==9){
-        //     print_table(ht);
-        // }
 
         cout << endl;
         cout << endl;
@@ -69,15 +68,16 @@ int main(int argc, char* argv[]){
         print_entropy(ht);
         cout << endl;
         ref_entropy = ht->entropy;
+        entropias[i] = ref_entropy;
 
         //Deep Copy of hashtable
         deep_copy_hashtable(ht, ht2);
-        //Clear table to insert occurences
-        clean_items(ht2);
 
         //free table and close file of reference text
         free_table(ht);
-        input_file.close();
+
+        //Clear table to insert occurences
+        clean_items(ht2);
 
 
         // Calculate similarity of 2nd text
@@ -98,16 +98,20 @@ int main(int argc, char* argv[]){
         }
         ht_insert_second(ht2, old_str1,tolower(byte));
 
+        input_file2.close();
+
         //Calculate and print entropy of text in analysis
         entropy(ht2,alfa);
         cout << "Texto em Analise: ";
         print_entropy(ht2);
         cout << endl;
         analysis_entropy = ht2->entropy;
+        entr[i] = analysis_entropy;
 
         alphabet.clear();
+        //---------------------------
         free_table(ht2);
-        input_file2.close();
+        //---------------------------
 
         if((min_entropy_diference > abs(analysis_entropy - ref_entropy)) && (analysis_entropy != 0)){
             min_entropy_diference = abs(analysis_entropy - ref_entropy);
@@ -121,6 +125,9 @@ int main(int argc, char* argv[]){
     cout << endl;
     cout << endl;
     cout << "---------------------- RESULTS ----------------------" << endl;
+    for(int i=0 ; i<11 ; i++){
+        cout << "Texto de Referencia: " << filename[i] << " \t -> \tEntropia modelo: " << entropias[i] << " \t\tNbits analise: "<<  entr[i] << "\t\t diferenca = "<< abs(entr[i]  - entropias[i]) << endl;
+    }
     cout << "Language " << filename[language].substr(filename[language].find("/")+1) << endl;
     cout << "Estimated Bytes " << analysis_entropy << endl;
 

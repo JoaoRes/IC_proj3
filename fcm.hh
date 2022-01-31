@@ -75,6 +75,7 @@ HashTable* create_table(int size, int array_size) {
 void free_item(Ht_item* item) {
     // Frees an item
     free(item->key);
+    free(item->array);
     //free(item->value);
     free(item);
 }
@@ -240,7 +241,7 @@ void print_search(HashTable* table, char* key) {
 }
 
 void print_entropy(HashTable* table){
-    cout << "File Entropy "<< table->entropy<<endl;
+    cout << "File Nbits per char: "<< table->entropy<<endl;
 }
 
 void print_table(HashTable* table) {
