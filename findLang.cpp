@@ -95,6 +95,7 @@ int main(int argc, char* argv[]){
             ht_insert_second(ht2, old_str1,tolower(byte));//Ntolower(byte));
             std::memmove(old_str1, old_str1 + 1, k);
             old_str1[k-1] = tolower(byte);
+            p = (double) (ht->items[i]->array[j] + alfa) / (ht->items[i]->cocurrences+alfa*table->array_Size);
         }
         ht_insert_second(ht2, old_str1,tolower(byte));
 

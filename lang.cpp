@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     }
 
     ht = create_table(CAPACITY,alphabet.size());
-    ht2 = create_table(CAPACITY,alphabet.size());
+
     char* old_str = (char*)malloc(sizeof(char) * k);
     int relative = 0;
     input_file.clear();
@@ -40,48 +40,56 @@ int main(int argc, char* argv[]){
     }
     ht_insert(ht, old_str,tolower(byte));
     // print all elements of the set s2
-    set<char, greater<char>>::iterator itr;
-    cout << "\nAlphabet : \n";
+    // set<char, greater<char>>::iterator itr;
+    // cout << "\nAlphabet : \n";
 
-    for (itr = alphabet.begin(); itr != alphabet.end(); itr++) {
-        cout << *itr << " ";
+    // for (itr = alphabet.begin(); itr != alphabet.end(); itr++) {
+    //     cout << *itr << " ";
 
-    }
-
-    //ht2 = create_table(CAPACITY,alphabet.size());
-    deep_copy_hashtable(ht, ht2);
-    clean_items(ht2);
+    // }
 
     char* old_str1 = (char*)malloc(sizeof(char) * k);
     int relative1 = 0;
-//    output_file.clear();
-//    output_file.seekg(0);
+    input_file.clear();
+    input_file.seekg(0);
     for (relative1= 0; relative1 <k ; relative1++) {
-        input_file2.get(byte);
+        input_file.get(byte);
         old_str1[relative1++] = tolower(byte);
 
     }
-    while (input_file2.get(byte)) {
-        ht_insert_second(ht2, old_str1,tolower(byte));//Ntolower(byte));
+    double nbits=0;
+    int ocurrences=0;
+    while (input_file.get(byte)) {
+        int i;
         std::memmove(old_str1, old_str1 + 1, k);
         old_str1[k-1] = tolower(byte);
+        i=ht_search(ht,old_str1);
+        if(i > 0){
+            if (ht->items[i]&& ht->items[i]->cocurrences) {
+                for (int j = 0; j < ht->array_Size; j++) {
+                    if (ht->items[i]->array[j] >= 0) {
+                        cout<< "item[" << ht->items[i] << "] value : "<< ht->items[i]->array[j]<<endl;
+                        nbits += -log2((double) (ht->items[i]->array[j] + alfa) / (ht->items[i]->cocurrences+alfa*ht->array_Size));                     
+                    }
+                }
+            }
+        }
+        ocurrences++;
     }
-    ht_insert_second(ht2, old_str1,tolower(byte));
-    // print all elements of the set s2
 
     cout << endl;
     cout << endl;
     input_file.close();
     input_file2.close();
     entropy(ht,alfa);
-    entropy(ht2,alfa);
+    cout << "nbits " <<nbits<< endl;
+    cout <<  nbits/(ht->occurrences+ocurrences) << endl;
 
     //print_table(ht);
     //cout << "-----------------------------------HASH 1--------------------------------" << endl;
     //print_table(ht2);
 
     print_entropy(ht);
-    print_entropy(ht2);
 
     return EXIT_SUCCESS;
 }

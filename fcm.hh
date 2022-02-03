@@ -194,7 +194,6 @@ void ht_insert_second(HashTable* table, char* key,char next_char) {
 
 
     if (current_item != NULL) {
-
         // Scenario 1: We only need to update value
         if (strcmp(current_item->key, key) == 0) {
             if(next_char!= NULL) {
@@ -325,6 +324,7 @@ void entropy(HashTable* table,double alfa){
                     p = (double) (table->items[i]->array[j] + alfa) / (table->items[i]->cocurrences+alfa*table->array_Size);
                     //cout << "p " << p << endl;
                     table->items[i]->entropy += -p * log2(p);
+
                 }
             }
             table->entropy+=(table->items[i]->entropy * table->items[i]->cocurrences / table->occurrences);
